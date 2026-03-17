@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft Web - Tablet Fix</title>
+    <title>Minecraft 1.8.7 - Purpleguy Edition</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; touch-action: none; }
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+        /* Ekranın kaymasını engelleyen ve POV kilitlenmesini çözen kritik CSS */
+        html, body { 
+            position: fixed; width: 100%; height: 100%; 
+            margin: 0; padding: 0; overflow: hidden; 
+            background: #000; touch-action: none; 
+            font-family: 'Courier New', monospace;
+        }
         
-        /* Menü Fix */
+        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
+        
+        /* Menü: Tam orta ve sabit */
         #menu { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 300px; padding: 20px; background: rgba(0,0,0,0.9);
+            width: 280px; padding: 20px; background: rgba(0,0,0,0.95);
             border: 4px solid #555; color: #fff; text-align: center; pointer-events: auto;
         }
-        .btn { background: #555; border: 2px solid #000; color: #fff; padding: 10px; margin: 10px 0; cursor: pointer; display: block; width: 100%; font-weight: bold; }
-        
-        /* Dokunmatik Kontroller */
-        #joystick-area { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
-        #joystick-stick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        
-        #action-panel { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 10px; pointer-events: auto; }
-        .act-btn { width: 65px; height: 65px; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; }
+        .btn { background: #555; border: 2px solid #000; color: #fff; padding: 12px; margin: 10px 0; cursor: pointer; display: block; width: 100%; font-weight: bold; }
 
-        /* Hotbar */
-        #hotbar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; background: rgba(0,0,0,0.8); padding: 4px; gap: 4px; pointer-events: auto; }
-        .slot { width: 40px; height: 40px; border: 2px solid #333; background: #8b8b8b; display: flex; justify-content: center; align-items: center; }
-        .slot.active { border-color: #fff; background: #bdbdbd; }
+        /* Tablet Kontrolleri (Bedrock Style) */
+        #joystick-area { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; }
+        #stick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+        
+        #action-btns { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 12px; pointer-events: auto; }
+        .act-btn { width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; color: #fff; display: flex; justify-content: center; align-items: center; text-align: center; font-size: 10px; font-weight: bold; }
 
-        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 20px; opacity: 0.8; }
+        /* Hotbar: Aşağı kaymasın diye düzeltildi */
+        #hotbar { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; background: rgba(0,0,0,0.8); border: 3px solid #1e1e1e; padding: 4px; gap: 4px; pointer-events: auto; }
+        .slot { width: 40px; height: 40px; background: #8B8B8B; border: 3px solid #373737; position: relative; }
+        .slot.active { border-color: #fff; background: #c6c6c6; }
+
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 24px; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -37,18 +44,17 @@
     <div id="crosshair">+</div>
     
     <div id="menu">
-        <h2 id="m-title">MINECRAFT 1.8.7</h2>
-        <p style="font-size: 10px; color: #ffff55;">Purpleguy © 2026 - tablet power</p>
-        <button class="btn" id="start-btn">OYUNA GİR / JOIN</button>
-        <button class="btn" id="lang-btn">TR / EN</button>
+        <h2 style="margin:0">MINECRAFT 1.8.7</h2>
+        <div style="color:#ffff55; font-size:10px; margin-bottom:15px">Purpleguy © 2026 - tablet power</div>
+        <button class="btn" id="start-btn">SERVERA BAĞLAN</button>
+        <button class="btn" onclick="alert('Dil: Türkçe')">AYARLAR</button>
     </div>
 
-    <div id="joystick-area"><div id="joystick-stick"></div></div>
+    <div id="joystick-area"><div id="stick"></div></div>
 
-    <div id="action-panel">
-        <div class="act-btn" id="btn-break">KIR<br>BREAK</div>
-        <div class="act-btn" id="btn-place">KOY<br>PLACE</div>
-        <div class="act-btn" id="btn-jump">ZIPLA<br>JUMP</div>
+    <div id="action-btns">
+        <div class="act-btn" id="place-btn">KOY<br>PLACE</div>
+        <div class="act-btn" id="jump-btn">ZIPLA<br>JUMP</div>
     </div>
 
     <div id="hotbar"></div>
@@ -61,13 +67,22 @@
 <script type="module">
     import * as THREE from 'three';
 
-    // --- AYARLAR ---
-    let lang = "TR";
-    let isPlaying = false;
-    let selectedSlot = 0;
-    const colors = [0x567d46, 0x808080, 0x5d4037, 0x3e2723, 0xa1887f];
+    // --- TEXTURE LOADER & ATLAS MAPPING ---
+    const loader = new THREE.TextureLoader();
+    // Dokuların assets/sprites/terrain.png içinde olduğunu varsayıyoruz
+    const terrainTex = loader.load('assets/sprites/terrain.png');
+    terrainTex.magFilter = THREE.NearestFilter;
+    terrainTex.minFilter = THREE.NearestFilter;
 
-    // --- ENGINE ---
+    function getTile(x, y) {
+        const tex = terrainTex.clone();
+        tex.repeat.set(1/16, 1/16);
+        tex.offset.set(x/16, (15-y)/16);
+        return tex;
+    }
+
+    // --- ENGINE KURULUMU ---
+    let isPlaying = false;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -75,47 +90,55 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Dünya Oluşturma
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+
+    // Blok Verileri
+    const blocksData = [
+        { name: "Çimen", tex: getTile(0, 0) },
+        { name: "Taş", tex: getTile(1, 0) },
+        { name: "Toprak", tex: getTile(2, 0) },
+        { name: "Tahta", tex: getTile(4, 0) }
+    ];
+
     const blocks = [];
     const geo = new THREE.BoxGeometry(1, 1, 1);
     for(let x=-10; x<10; x++) {
         for(let z=-10; z<10; z++) {
-            const mat = new THREE.MeshStandardMaterial({ color: colors[0] });
-            const m = new THREE.Mesh(geo, mat);
+            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: blocksData[0].tex }));
             m.position.set(x, 0, z);
             scene.add(m);
             blocks.push(m);
         }
     }
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
     camera.position.set(0, 2, 5);
 
-    // --- TABLET POV LOCK FIX (Touch Look) ---
+    // --- TABLET POV FIX (Sürükleyerek Bakma) ---
     let lon = 0, lat = 0;
     let startX, startY;
     document.addEventListener('touchstart', (e) => {
-        if(e.touches[0].clientX > window.innerWidth / 2) { // Ekranın sağ yarısı bakış
+        if(e.touches[0].clientX > window.innerWidth / 2) {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
         }
-    });
+    }, { passive: false });
+
     document.addEventListener('touchmove', (e) => {
         if(!isPlaying) return;
         for(let t of e.touches) {
             if(t.clientX > window.innerWidth / 2) {
                 let dx = t.clientX - startX;
                 let dy = t.clientY - startY;
-                lon += dx * 0.3;
-                lat = Math.max(-85, Math.min(85, lat - dy * 0.3));
+                lon += dx * 0.25;
+                lat = Math.max(-85, Math.min(85, lat - dy * 0.25));
                 startX = t.clientX;
                 startY = t.clientY;
             }
         }
-    });
+    }, { passive: false });
 
-    // --- JOYSTICK (Movement) ---
+    // --- JOYSTICK (Hareket) ---
     let move = { x: 0, z: 0 };
-    const stick = document.getElementById('joystick-stick');
+    const stick = document.getElementById('stick');
     document.getElementById('joystick-area').addEventListener('touchmove', (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const cx = rect.left + rect.width/2;
@@ -133,27 +156,42 @@
         move = { x: 0, z: 0 };
     });
 
-    // --- OYUN İÇİ ETKİLEŞİM ---
+    // --- OYUN ETKİLEŞİMİ ---
     document.getElementById('start-btn').onclick = () => {
         isPlaying = true;
         document.getElementById('menu').style.display = 'none';
+        console.log("Purpleguy: Server 1.8.7 Connected. EULA=true");
     };
 
-    document.getElementById('btn-jump').ontouchstart = () => { if(camera.position.y <= 2.1) vY = 0.15; };
+    let selectedIdx = 0;
+    document.getElementById('place-btn').ontouchstart = () => {
+        const ray = new THREE.Raycaster();
+        ray.setFromCamera(new THREE.Vector2(), camera);
+        const hits = ray.intersectObjects(blocks);
+        if(hits.length > 0 && hits[0].distance < 6) {
+            const p = hits[0].object.position.clone().add(hits[0].face.normal);
+            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: blocksData[selectedIdx].tex }));
+            m.position.copy(p);
+            scene.add(m);
+            blocks.push(m);
+        }
+    };
+
+    let vY = 0;
+    document.getElementById('jump-btn').ontouchstart = () => { if(camera.position.y <= 2.01) vY = 0.12; };
 
     // --- RENDER LOOP ---
-    let vY = 0;
     function animate() {
         requestAnimationFrame(animate);
         if(isPlaying) {
-            // Bakış Güncelleme
+            // Kamera Bakış Güncelleme
             const phi = THREE.MathUtils.degToRad(90 - lat);
             const theta = THREE.MathUtils.degToRad(lon);
             const target = new THREE.Vector3();
             target.setFromSphericalCoords(1, phi, theta).add(camera.position);
             camera.lookAt(target);
 
-            // Hareket
+            // Hareket Hesaplama
             const forward = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
             forward.y = 0; forward.normalize();
             const right = new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
@@ -162,26 +200,25 @@
             camera.position.addScaledVector(forward, -move.z * 0.1);
             camera.position.addScaledVector(right, move.x * 0.1);
 
-            // Yerçekimi (Basit)
+            // Yerçekimi
             vY -= 0.005;
             camera.position.y += vY;
             if(camera.position.y < 2) { camera.position.y = 2; vY = 0; }
         }
         renderer.render(scene, camera);
     }
-
+    
     // Hotbar Kurulum
-    const hb = document.getElementById('hotbar');
-    colors.forEach((c, i) => {
+    const hDiv = document.getElementById('hotbar');
+    blocksData.forEach((b, i) => {
         const s = document.createElement('div');
         s.className = `slot ${i===0?'active':''}`;
-        s.innerHTML = `<div style="width:25px;height:25px;background:#${c.toString(16)}"></div>`;
         s.onclick = () => {
             document.querySelectorAll('.slot').forEach(el => el.classList.remove('active'));
             s.classList.add('active');
-            selectedSlot = i;
+            selectedIdx = i;
         };
-        hb.appendChild(s);
+        hDiv.appendChild(s);
     });
 
     animate();
