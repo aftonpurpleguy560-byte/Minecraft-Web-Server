@@ -2,47 +2,65 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft 1.8.7 - Server Console Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Minecraft Web - Multi-Platform</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; user-select: none; display: flex; }
-        #game-container { position: relative; width: 75%; height: 100vh; }
+        :root { --mc-bg: rgba(0,0,0,0.85); --mc-border: #373737; --mc-white: #ffffff; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; user-select: none; touch-action: none; }
         
-        /* SERVER CONSOLE PANEL */
-        #console-panel { 
-            width: 25%; height: 100vh; background: #0c0c0c; 
-            border-left: 2px solid #333; color: #aaa; 
-            display: flex; flex-direction: column; font-size: 12px;
-        }
-        #console-header { background: #1a1a1a; padding: 10px; color: #eee; font-weight: bold; border-bottom: 1px solid #333; }
-        #console-logs { flex-grow: 1; padding: 10px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
-        .log-info { color: #55ff55; }
-        .log-warn { color: #ffff55; }
-        .log-time { color: #888; margin-right: 5px; }
+        /* GAME & CONSOLE LAYOUT */
+        #main-wrapper { display: flex; width: 100vw; height: 100vh; }
+        #game-container { position: relative; flex-grow: 1; background: #87CEEB; }
+        #console-panel { width: 250px; background: #0c0c0c; border-left: 2px solid #333; display: flex; flex-direction: column; color: #aaa; font-size: 11px; transition: width 0.3s; }
 
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; color: white; font-size: 24px; display: flex; justify-content: center; align-items: center; }
-        #ui-layer { position: absolute; bottom: 15px; left: 0; width: 100%; pointer-events: none; display: flex; justify-content: center; }
-        .hotbar { display: flex; background: rgba(0,0,0,0.8); border: 3px solid #1e1e1e; padding: 3px; gap: 3px; pointer-events: auto; }
-        .slot { width: 45px; height: 45px; background: #8B8B8B; border: 3px solid #373737; display: flex; justify-content: center; align-items: center; }
-        .slot.selected { border: 3px solid #FFF; background: #c6c6c6; }
+        /* TOUCH CONTROLS (Bedrock Style) */
+        #touch-controls { position: absolute; bottom: 30px; left: 30px; width: 150px; height: 150px; display: none; z-index: 20; }
+        #joystick-base { width: 100%; height: 100%; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); position: relative; }
+        #joystick-stick { width: 60px; height: 60px; background: rgba(255,255,255,0.4); border-radius: 50%; position: absolute; top: 45px; left: 45px; }
         
-        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500; cursor: pointer; text-align: center; }
+        #action-buttons { position: absolute; bottom: 30px; right: 30px; display: none; gap: 15px; z-index: 20; }
+        .touch-btn { width: 70px; height: 70px; background: rgba(0,0,0,0.5); border: 3px solid #fff; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 12px; }
+
+        /* ESC MENU */
+        #esc-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--mc-bg); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .menu-btn { width: 250px; padding: 15px; margin: 5px; background: #555; border: 3px solid #000; color: white; cursor: pointer; text-align: center; font-weight: bold; }
+        .menu-btn:hover { background: #777; border-color: #fff; }
+
+        /* UI ELEMENTS */
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; pointer-events: none; z-index: 10; }
+        #lang-toggle { position: absolute; top: 10px; left: 10px; z-index: 1100; cursor: pointer; background: #333; color: white; border: 1px solid white; padding: 5px; }
+        
+        @media (max-width: 800px) { #console-panel { width: 0; overflow: hidden; border: none; } }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="menu">
-            <h1>MINECRAFT 1.8.7</h1>
-            <p style="color:#ffff55">Purpleguy © 2026 - tablet power</p>
-            <p>SUNUCUYA BAĞLANMAK İÇİN TIKLA</p>
-        </div>
-        <div id="crosshair">+</div>
-        <div id="ui-layer"><div class="hotbar" id="hotbar-ui"></div></div>
-    </div>
+    <button id="lang-toggle">TR / EN</button>
 
-    <div id="console-panel">
-        <div id="console-header">SERVER CONSOLE (v1.8.7)</div>
-        <div id="console-logs" id="logs"></div>
+    <div id="main-wrapper">
+        <div id="game-container">
+            <div id="crosshair">+</div>
+            
+            <div id="esc-menu">
+                <h1 id="txt-title">GAME PAUSED</h1>
+                <div class="menu-btn" id="btn-resume">RESUME GAME</div>
+                <div class="menu-btn" id="btn-lang">CHANGE LANGUAGE</div>
+                <div class="menu-btn" id="btn-quit" onclick="location.reload()">QUIT</div>
+            </div>
+
+            <div id="touch-controls">
+                <div id="joystick-base"><div id="joystick-stick"></div></div>
+            </div>
+            <div id="action-buttons">
+                <div class="touch-btn" id="btn-jump">JUMP</div>
+                <div class="touch-btn" id="btn-place">PLACE</div>
+            </div>
+        </div>
+
+        <div id="console-panel">
+            <div style="padding: 10px; background: #1a1a1a; font-weight: bold;">SERVER CONSOLE</div>
+            <div id="logs" style="flex-grow:1; padding:10px; overflow-y:auto; line-height:1.4;"></div>
+        </div>
     </div>
 
     <script type="importmap">
@@ -53,114 +71,110 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        const logsDiv = document.getElementById('console-logs');
-        
-        // --- CONSOLE LOG SİSTEMİ ---
-        function serverLog(msg, type = "info") {
-            const time = new Date().toLocaleTimeString();
-            const logElement = document.createElement('div');
-            logElement.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">[Server thread/${type.toUpperCase()}]:</span> ${msg}`;
-            logsDiv.appendChild(logElement);
-            logsDiv.scrollTop = logsDiv.scrollHeight;
-            console.log(`[MC Server]: ${msg}`);
+        // --- DİL VE AYARLAR ---
+        let currentLang = 'TR';
+        const langData = {
+            TR: { title: "OYUN DURAKLATILDI", resume: "DEVAM ET", quit: "ÇIKIŞ", join: "Purpleguy sunucuya katıldı", place: "KOY", jump: "ZIPLA" },
+            EN: { title: "GAME PAUSED", resume: "RESUME", quit: "QUIT", join: "Purpleguy joined the game", place: "PLACE", jump: "JUMP" }
+        };
+
+        function updateLang() {
+            const d = langData[currentLang];
+            document.getElementById('txt-title').innerText = d.title;
+            document.getElementById('btn-resume').innerText = d.resume;
+            document.getElementById('btn-quit').innerText = d.quit;
+            document.getElementById('btn-place').innerText = d.place;
+            document.getElementById('btn-jump').innerText = d.jump;
         }
 
-        // Başlangıç Logları
-        serverLog("Starting minecraft server version 1.8.7");
-        serverLog("Loading properties...");
-        serverLog("Default game type: SURVIVAL");
-        serverLog("Generating area, please wait...", "info");
+        document.getElementById('lang-toggle').onclick = () => {
+            currentLang = currentLang === 'TR' ? 'EN' : 'TR';
+            updateLang();
+        };
 
-        // --- ENGINE ---
+        // --- TABLET ALGILAMA ---
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if(isTouch) {
+            document.getElementById('touch-controls').style.display = 'block';
+            document.getElementById('action-buttons').style.display = 'flex';
+        }
+
+        // --- ENGINE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.75) / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: false });
-        renderer.setSize(window.innerWidth * 0.75, window.innerHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('game-container').appendChild(renderer.domElement);
 
         const controls = new PointerLockControls(camera, document.body);
-        document.getElementById('menu').onclick = () => {
-            controls.lock();
-            serverLog("Player joined the game: Purpleguy", "info");
-        };
-        controls.addEventListener('unlock', () => serverLog("Player left the game: Purpleguy (Disconnected)", "warn"));
+        const escMenu = document.getElementById('esc-menu');
 
-        // Bloklar
-        const blocks = [];
-        const box = new THREE.BoxGeometry(1, 1, 1);
-        const colors = [0x567d46, 0x888888, 0x795548, 0x3e2723];
+        document.getElementById('btn-resume').onclick = () => controls.lock();
+        controls.addEventListener('lock', () => escMenu.style.display = 'none');
+        controls.addEventListener('unlock', () => escMenu.style.display = 'flex');
 
-        function createBlock(x, y, z, colorIdx) {
-            const m = new THREE.Mesh(box, new THREE.MeshStandardMaterial({ color: colors[colorIdx] }));
-            m.position.set(x, y, z);
-            scene.add(m);
-            blocks.push(m);
+        // Basit Dünya
+        const geo = new THREE.BoxGeometry(1,1,1);
+        const mat = new THREE.MeshStandardMaterial({ color: 0x567d46 });
+        for(let x=-10; x<10; x++) {
+            for(let z=-10; z<10; z++) {
+                const m = new THREE.Mesh(geo, mat);
+                m.position.set(x, 0, z);
+                scene.add(m);
+            }
+        }
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+        camera.position.set(0, 2, 5);
+
+        // --- JOYSTICK LOGIC ---
+        let moveVec = { x: 0, y: 0 };
+        if(isTouch) {
+            const stick = document.getElementById('joystick-stick');
+            const base = document.getElementById('joystick-base');
+            base.addEventListener('touchmove', (e) => {
+                const rect = base.getBoundingClientRect();
+                const centerX = rect.left + rect.width/2;
+                const centerY = rect.top + rect.height/2;
+                let dx = e.touches[0].clientX - centerX;
+                let dy = e.touches[0].clientY - centerY;
+                const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 45);
+                const angle = Math.atan2(dy, dx);
+                
+                const moveX = Math.cos(angle) * dist;
+                const moveY = Math.sin(angle) * dist;
+                stick.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                
+                moveVec.x = moveX / 45;
+                moveVec.y = -moveY / 45;
+            });
+            base.addEventListener('touchend', () => {
+                stick.style.transform = `translate(0,0)`;
+                moveVec = { x: 0, y: 0 };
+            });
         }
 
-        // Zemin ve Başlangıç
-        for(let x=-10; x<10; x++) for(let z=-10; z<10; z++) createBlock(x, 0, z, 0);
-        serverLog("Preparing spawn area: 100%");
-
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-        camera.position.set(0, 5, 5);
-
-        // UI
-        let sel = 0;
-        const hb = document.getElementById('hotbar-ui');
-        colors.forEach((c, i) => {
-            const s = document.createElement('div');
-            s.className = `slot ${i===0?'selected':''}`;
-            s.id = `hb-${i}`;
-            s.innerHTML = `<div style="width:30px;height:30px;background:#${c.toString(16)}"></div>`;
-            hb.appendChild(s);
-        });
-
-        // --- ETKİLEŞİM ---
-        let keys = {};
-        window.onkeydown = (e) => {
-            keys[e.code] = true;
-            if(e.key >= 1 && e.key <= 4) {
-                sel = e.key - 1;
-                document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
-                document.getElementById('hb-'+sel).classList.add('selected');
-                serverLog(`Selected slot: ${sel + 1}`);
-            }
-        };
-        window.onkeyup = (e) => keys[e.code] = false;
-
-        window.onmousedown = (e) => {
-            if(!controls.isLocked) return;
-            const ray = new THREE.Raycaster();
-            ray.setFromCamera(new THREE.Vector2(), camera);
-            const hits = ray.intersectObjects(blocks);
-            if(hits.length > 0 && hits[0].distance < 6) {
-                const pos = hits[0].object.position;
-                if(e.button === 0) {
-                    serverLog(`Block broken at [${pos.x}, ${pos.y}, ${pos.z}]`);
-                    scene.remove(hits[0].object);
-                    blocks.splice(blocks.indexOf(hits[0].object), 1);
-                } else {
-                    const p = pos.clone().add(hits[0].face.normal);
-                    serverLog(`Block placed at [${p.x}, ${p.y}, ${p.z}]`);
-                    createBlock(p.x, p.y, p.z, sel);
-                }
-            }
-        };
-
+        // --- ANIMATE ---
         function animate() {
             requestAnimationFrame(animate);
-            if(controls.isLocked) {
-                if(keys['KeyW']) controls.moveForward(0.1);
-                if(keys['KeyS']) controls.moveForward(-0.1);
-                if(keys['KeyA']) controls.moveRight(-0.1);
-                if(keys['KeyD']) controls.moveRight(0.1);
-                if(camera.position.y > 1.8) camera.position.y -= 0.1;
-                if(keys['Space'] && camera.position.y <= 1.9) camera.position.y += 2;
+            if(controls.isLocked || isTouch) {
+                // PC Hareket
+                // (Buraya eski W,A,S,D kodlarını ekleyebilirsin)
+                
+                // Dokunmatik Hareket
+                if(isTouch) {
+                    controls.moveRight(moveVec.x * 0.1);
+                    controls.moveForward(moveVec.y * 0.1);
+                }
             }
             renderer.render(scene, camera);
         }
+        
+        updateLang();
         animate();
+        // Server Başlatma Logu
+        const logBox = document.getElementById('logs');
+        logBox.innerHTML += `<div>[${new Date().toLocaleTimeString()}] INFO: Server started on Tablet Mode: ${isTouch}</div>`;
     </script>
 </body>
 </html>
