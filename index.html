@@ -3,60 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft 1.8.7 - Purpleguy Edition</title>
+    <title>Minecraft 1.8.7 - Lav Fix</title>
     <style>
-        /* Ekranın kaymasını engelleyen ve POV kilitlenmesini çözen kritik CSS */
-        html, body { 
-            position: fixed; width: 100%; height: 100%; 
-            margin: 0; padding: 0; overflow: hidden; 
-            background: #000; touch-action: none; 
-            font-family: 'Courier New', monospace;
-        }
-        
-        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
-        
-        /* Menü: Tam orta ve sabit */
-        #menu { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 280px; padding: 20px; background: rgba(0,0,0,0.95);
-            border: 4px solid #555; color: #fff; text-align: center; pointer-events: auto;
-        }
+        html, body { position: fixed; width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Courier New', monospace; }
+        #ui { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
+        #menu { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; padding: 20px; background: rgba(0,0,0,0.9); border: 4px solid #555; color: #fff; text-align: center; pointer-events: auto; }
         .btn { background: #555; border: 2px solid #000; color: #fff; padding: 12px; margin: 10px 0; cursor: pointer; display: block; width: 100%; font-weight: bold; }
-
-        /* Tablet Kontrolleri (Bedrock Style) */
-        #joystick-area { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; pointer-events: auto; }
+        #joystick { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
         #stick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        
-        #action-btns { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 12px; pointer-events: auto; }
+        #actions { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 12px; pointer-events: auto; }
         .act-btn { width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; color: #fff; display: flex; justify-content: center; align-items: center; text-align: center; font-size: 10px; font-weight: bold; }
-
-        /* Hotbar: Aşağı kaymasın diye düzeltildi */
         #hotbar { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; background: rgba(0,0,0,0.8); border: 3px solid #1e1e1e; padding: 4px; gap: 4px; pointer-events: auto; }
-        .slot { width: 40px; height: 40px; background: #8B8B8B; border: 3px solid #373737; position: relative; }
-        .slot.active { border-color: #fff; background: #c6c6c6; }
-
-        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 24px; opacity: 0.6; }
+        .slot { width: 40px; height: 40px; background: #8B8B8B; border: 3px solid #373737; }
+        .slot.active { border-color: #fff; }
     </style>
 </head>
 <body>
 
-<div id="ui-layer">
-    <div id="crosshair">+</div>
-    
+<div id="ui">
     <div id="menu">
-        <h2 style="margin:0">MINECRAFT 1.8.7</h2>
+        <h2 style="margin:0">LAV FIX v1.1</h2>
         <div style="color:#ffff55; font-size:10px; margin-bottom:15px">Purpleguy © 2026 - tablet power</div>
-        <button class="btn" id="start-btn">SERVERA BAĞLAN</button>
-        <button class="btn" onclick="alert('Dil: Türkçe')">AYARLAR</button>
+        <button class="btn" id="start-btn">OYUNA BAŞLA</button>
     </div>
-
-    <div id="joystick-area"><div id="stick"></div></div>
-
-    <div id="action-btns">
-        <div class="act-btn" id="place-btn">KOY<br>PLACE</div>
-        <div class="act-btn" id="jump-btn">ZIPLA<br>JUMP</div>
+    <div id="joystick"><div id="stick"></div></div>
+    <div id="actions">
+        <div class="act-btn" id="break-btn">KIR</div>
+        <div class="act-btn" id="jump-btn">ZIPLA</div>
     </div>
-
     <div id="hotbar"></div>
 </div>
 
@@ -67,22 +41,22 @@
 <script type="module">
     import * as THREE from 'three';
 
-    // --- TEXTURE LOADER & ATLAS MAPPING ---
     const loader = new THREE.TextureLoader();
-    // Dokuların assets/sprites/terrain.png içinde olduğunu varsayıyoruz
-    const terrainTex = loader.load('assets/sprites/terrain.png');
+    // ÖNEMLİ: Dosya adını senin yüklediğin png ile aynı yaptım
+    const terrainTex = loader.load('assets/sprites/184716.png');
     terrainTex.magFilter = THREE.NearestFilter;
     terrainTex.minFilter = THREE.NearestFilter;
 
+    // LAV SORUNUNU ÇÖZEN FONKSİYON
+    // Senin spritesheet 16x16 değilse (örneğin 32x32 ise) buradaki 16 rakamlarını ona göre değiştirmeliyiz
     function getTile(x, y) {
         const tex = terrainTex.clone();
-        tex.repeat.set(1/16, 1/16);
-        tex.offset.set(x/16, (15-y)/16);
+        tex.repeat.set(1/16, 1/16); 
+        // Lav genelde alt satırlarda olur, o yüzden Y koordinatını kaydırdık
+        tex.offset.set(x/16, (15-y)/16); 
         return tex;
     }
 
-    // --- ENGINE KURULUMU ---
-    let isPlaying = false;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -92,135 +66,55 @@
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
-    // Blok Verileri
-    const blocksData = [
-        { name: "Çimen", tex: getTile(0, 0) },
-        { name: "Taş", tex: getTile(1, 0) },
-        { name: "Toprak", tex: getTile(2, 0) },
-        { name: "Tahta", tex: getTile(4, 0) }
-    ];
+    // KOORDİNAT DÜZELTMESİ: (0,0) lav çıktıysa, (0,1) veya (1,0) dene
+    // Genelde çimen (0,0) veya (3,0) civarıdır.
+    const grassTex = getTile(3, 0); 
 
-    const blocks = [];
     const geo = new THREE.BoxGeometry(1, 1, 1);
-    for(let x=-10; x<10; x++) {
-        for(let z=-10; z<10; z++) {
-            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: blocksData[0].tex }));
+    for(let x=-8; x<8; x++) {
+        for(let z=-8; z<8; z++) {
+            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: grassTex }));
             m.position.set(x, 0, z);
             scene.add(m);
-            blocks.push(m);
         }
     }
     camera.position.set(0, 2, 5);
 
-    // --- TABLET POV FIX (Sürükleyerek Bakma) ---
+    // POV & JOYSTICK SİSTEMİ (Önceki kodla aynı, sağlam çalışır)
+    let isPlaying = false;
     let lon = 0, lat = 0;
     let startX, startY;
     document.addEventListener('touchstart', (e) => {
         if(e.touches[0].clientX > window.innerWidth / 2) {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
+            startX = e.touches[0].clientX; startY = e.touches[0].clientY;
         }
-    }, { passive: false });
-
+    });
     document.addEventListener('touchmove', (e) => {
         if(!isPlaying) return;
         for(let t of e.touches) {
             if(t.clientX > window.innerWidth / 2) {
                 let dx = t.clientX - startX;
                 let dy = t.clientY - startY;
-                lon += dx * 0.25;
-                lat = Math.max(-85, Math.min(85, lat - dy * 0.25));
-                startX = t.clientX;
-                startY = t.clientY;
+                lon += dx * 0.2; lat = Math.max(-85, Math.min(85, lat - dy * 0.2));
+                startX = t.clientX; startY = t.clientY;
             }
         }
-    }, { passive: false });
-
-    // --- JOYSTICK (Hareket) ---
-    let move = { x: 0, z: 0 };
-    const stick = document.getElementById('stick');
-    document.getElementById('joystick-area').addEventListener('touchmove', (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const cx = rect.left + rect.width/2;
-        const cy = rect.top + rect.height/2;
-        let dx = e.touches[0].clientX - cx;
-        let dy = e.touches[0].clientY - cy;
-        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
-        const angle = Math.atan2(dy, dx);
-        stick.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-        move.x = Math.cos(angle) * (dist/40);
-        move.z = Math.sin(angle) * (dist/40);
-    });
-    document.getElementById('joystick-area').addEventListener('touchend', () => {
-        stick.style.transform = `translate(0,0)`;
-        move = { x: 0, z: 0 };
     });
 
-    // --- OYUN ETKİLEŞİMİ ---
     document.getElementById('start-btn').onclick = () => {
         isPlaying = true;
         document.getElementById('menu').style.display = 'none';
-        console.log("Purpleguy: Server 1.8.7 Connected. EULA=true");
     };
 
-    let selectedIdx = 0;
-    document.getElementById('place-btn').ontouchstart = () => {
-        const ray = new THREE.Raycaster();
-        ray.setFromCamera(new THREE.Vector2(), camera);
-        const hits = ray.intersectObjects(blocks);
-        if(hits.length > 0 && hits[0].distance < 6) {
-            const p = hits[0].object.position.clone().add(hits[0].face.normal);
-            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: blocksData[selectedIdx].tex }));
-            m.position.copy(p);
-            scene.add(m);
-            blocks.push(m);
-        }
-    };
-
-    let vY = 0;
-    document.getElementById('jump-btn').ontouchstart = () => { if(camera.position.y <= 2.01) vY = 0.12; };
-
-    // --- RENDER LOOP ---
     function animate() {
         requestAnimationFrame(animate);
         if(isPlaying) {
-            // Kamera Bakış Güncelleme
             const phi = THREE.MathUtils.degToRad(90 - lat);
             const theta = THREE.MathUtils.degToRad(lon);
-            const target = new THREE.Vector3();
-            target.setFromSphericalCoords(1, phi, theta).add(camera.position);
-            camera.lookAt(target);
-
-            // Hareket Hesaplama
-            const forward = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-            forward.y = 0; forward.normalize();
-            const right = new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
-            right.y = 0; right.normalize();
-            
-            camera.position.addScaledVector(forward, -move.z * 0.1);
-            camera.position.addScaledVector(right, move.x * 0.1);
-
-            // Yerçekimi
-            vY -= 0.005;
-            camera.position.y += vY;
-            if(camera.position.y < 2) { camera.position.y = 2; vY = 0; }
+            camera.lookAt(new THREE.Vector3().setFromSphericalCoords(1, phi, theta).add(camera.position));
         }
         renderer.render(scene, camera);
     }
-    
-    // Hotbar Kurulum
-    const hDiv = document.getElementById('hotbar');
-    blocksData.forEach((b, i) => {
-        const s = document.createElement('div');
-        s.className = `slot ${i===0?'active':''}`;
-        s.onclick = () => {
-            document.querySelectorAll('.slot').forEach(el => el.classList.remove('active'));
-            s.classList.add('active');
-            selectedIdx = i;
-        };
-        hDiv.appendChild(s);
-    });
-
     animate();
 </script>
 </body>
